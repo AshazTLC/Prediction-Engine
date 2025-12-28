@@ -101,6 +101,12 @@ def chat_predict():
     data = request.get_json(silent=True) or {}
     prompt = data.get("prompt", "").lower()
 
+    if not prompt:
+        return jsonify({
+            "reply": "Please ask a valid question.",
+            "confidence": 0
+        })
+
     offers = historical_data["offers"]
 
     if not offers:
@@ -118,54 +124,17 @@ def chat_predict():
     reply = (
         f"Based on {total} historical offers, "
         f"'{best_offer.get('name', 'Top Offer')}' is expected to perform best "
-        f"in the next 90 days with an estimated revenue of "
-        f"${best_offer.get('revenue', 0):,}. "
+        f"in the next 30–90 days with an estimated revenue of "
+        f"₹{best_offer.get('revenue', 0):,}. "
         f"Confidence level is {int(confidence * 100)}%."
     )
 
     return jsonify({
         "reply": reply,
-        "top_offer": best_offer.get("name"),
+        "top_offer": best_offer.get("name", "Top Offer"),
         "confidence": confidence
     })
 
-# =========================
-# CHAT PREDICTION API
-# =========================
-@app.route("/api/chat/predict", methods=["POST"])
-def chat_predict():
-    data = request.get_json()
-    prompt = data.get("prompt", "")
-
-    if not prompt:
-        return jsonify({"reply": "Please ask a valid question."})
-
-    offers = historical_data["offers"]
-
-    if not offers:
-        return jsonify({
-            "reply": "I don’t have enough historical offer data yet. Please upload offer data first."
-        })
-
-    total_clicks = sum(o.get("clicks", 0) for o in offers)
-    total_revenue = sum(o.get("revenue", 0) for o in offers)
-    count = len(offers)
-
-    predicted_clicks = int(total_clicks / count)
-    predicted_revenue = int(total_revenue / count)
-    confidence = round(min(0.95, 0.6 + count * 0.05), 2)
-
-    reply = f"""
-Based on analysis of {count} past offers:
-
-• Expected clicks: {predicted_clicks}
-• Expected revenue: ₹{predicted_revenue}
-• Confidence level: {confidence * 100}%
-
-This offer type is likely to perform well in the next 30–90 days.
-"""
-
-    return jsonify({"reply": reply})
 
 # =========================
 # START SERVER
