@@ -1,4 +1,4 @@
-const API_URL = "https://thelewadsconenterprises.com/api/chat/predict";
+const API_URL = "https://theleadsconenterprises.com/api/chat/predict";
 
 const chatMessages = document.getElementById("chatMessages");
 const userInput = document.getElementById("userInput");
@@ -38,6 +38,7 @@ async function sendMessage() {
     thinking.textContent = data.reply || "No response received.";
 
   } catch (error) {
+    console.error(error);
     thinking.textContent = "Server error. Please try again.";
   }
 }
