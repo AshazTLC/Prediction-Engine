@@ -116,7 +116,7 @@ def chat_predict():
     total = len(offers)
 
     confidence = round(min(0.95, 0.6 + total * 0.05), 2)
-
+    
     reply = (
         f"Based on {total} historical offers, "
         f"'{best_offer.get('name', 'Top Offer')}' is expected to perform best "
