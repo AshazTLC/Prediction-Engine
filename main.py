@@ -11,11 +11,11 @@ from datetime import datetime
 from typing import Dict, List, Any
 import os
 
-from prediction_engine import PredictionEngine
-from prediction_engine.business_predictors import (
-    OfferPerformancePredictor,
-    EmailCreativePredictor,
-    GoogleAdsCampaignPredictor
+#from prediction_engine import PredictionEngine
+#from prediction_engine.business_predictors import (
+    #OfferPerformancePredictor,
+    #EmailCreativePredictor,
+   # GoogleAdsCampaignPredictor
 )
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ historical_data = {
 }
 
 # Global prediction engine
-engine = PredictionEngine()
+#engine = PredictionEngine()
 
 
 @app.route('/')
