@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Prediction Engine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Offer Prediction Engine</h1>
+            <p class="subtitle">Predict performance for your offers</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Get Predictions</h2>
+                </div>
+                
+                <div class="card-body">
+                    <button id="predictBtn" class="predict-button" onclick="predictOffers()">
+                        <span id="buttonText">Predict Offers</span>
+                        <span id="buttonLoader" class="loader" style="display: none;"></span>
+                    </button>
+
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                    <div id="results" class="results" style="display: none;">
+                        <h3>Prediction Results</h3>
+                        <div class="results-grid">
+                            <div class="result-card">
+                                <div class="result-label">Predicted Clicks</div>
+                                <div class="result-value" id="predictedClicks">-</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-label">Predicted Conversions</div>
+                                <div class="result-value" id="predictedConversions">-</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-label">Predicted Revenue</div>
+                                <div class="result-value" id="predictedRevenue">-</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-label">Confidence</div>
+                                <div class="result-value" id="confidence">-</div>
+                            </div>
+                            <div class="result-card full-width">
+                                <div class="result-label">Based on Records</div>
+                                <div class="result-value" id="basedOnRecords">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>ℹ️ How it works</h3>
+                <p>Click the "Predict Offers" button to get predictions based on your historical data. The system will analyze patterns and provide performance estimates.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Prediction Engine v1.0</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
