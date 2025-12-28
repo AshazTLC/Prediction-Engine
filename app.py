@@ -129,6 +129,43 @@ def chat_predict():
         "confidence": confidence
     })
 
+# =========================
+# CHAT PREDICTION API
+# =========================
+@app.route("/api/chat/predict", methods=["POST"])
+def chat_predict():
+    data = request.get_json()
+    prompt = data.get("prompt", "")
+
+    if not prompt:
+        return jsonify({"reply": "Please ask a valid question."})
+
+    offers = historical_data["offers"]
+
+    if not offers:
+        return jsonify({
+            "reply": "I don’t have enough historical offer data yet. Please upload offer data first."
+        })
+
+    total_clicks = sum(o.get("clicks", 0) for o in offers)
+    total_revenue = sum(o.get("revenue", 0) for o in offers)
+    count = len(offers)
+
+    predicted_clicks = int(total_clicks / count)
+    predicted_revenue = int(total_revenue / count)
+    confidence = round(min(0.95, 0.6 + count * 0.05), 2)
+
+    reply = f"""
+Based on analysis of {count} past offers:
+
+• Expected clicks: {predicted_clicks}
+• Expected revenue: ₹{predicted_revenue}
+• Confidence level: {confidence * 100}%
+
+This offer type is likely to perform well in the next 30–90 days.
+"""
+
+    return jsonify({"reply": reply})
 
 # =========================
 # START SERVER
