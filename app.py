@@ -30,7 +30,6 @@ def home():
         "status": "working"
     })
 
-
 # =========================
 # MODEL STATUS
 # =========================
@@ -43,7 +42,6 @@ def get_model_status():
             "campaigns": len(historical_data["campaigns"])
         }
     })
-
 
 # =========================
 # OFFER DATA UPLOAD
@@ -63,7 +61,6 @@ def upload_offer_data():
         "total": len(historical_data["offers"])
     })
 
-
 # =========================
 # OFFER PREDICTION
 # =========================
@@ -81,7 +78,6 @@ def predict_offers():
     predicted_clicks = int(total_clicks / count)
     predicted_conversions = int(predicted_clicks * 0.08)
     predicted_revenue = int(total_revenue / count)
-
     confidence = round(min(0.95, 0.6 + count * 0.05), 2)
 
     return jsonify({
@@ -92,20 +88,13 @@ def predict_offers():
         "based_on_records": count
     })
 
-
 # =========================
-# CHAT PREDICTION (AI STYLE)
+# AI CHAT PREDICTION (FINAL)
 # =========================
 @app.route("/api/chat/predict", methods=["POST"])
 def chat_predict():
     data = request.get_json(silent=True) or {}
-    prompt = data.get("prompt", "").lower()
-
-    if not prompt:
-        return jsonify({
-            "reply": "Please ask a valid question.",
-            "confidence": 0
-        })
+    prompt = data.get("prompt", "")
 
     offers = historical_data["offers"]
 
@@ -115,26 +104,23 @@ def chat_predict():
             "confidence": 0
         })
 
-    # Best offer by revenue
     best_offer = max(offers, key=lambda x: x.get("revenue", 0))
     total = len(offers)
-
     confidence = round(min(0.95, 0.6 + total * 0.05), 2)
 
     reply = (
         f"Based on {total} historical offers, "
         f"'{best_offer.get('name', 'Top Offer')}' is expected to perform best "
-        f"in the next 30–90 days with an estimated revenue of "
+        f"in the next 90 days with an estimated revenue of "
         f"₹{best_offer.get('revenue', 0):,}. "
         f"Confidence level is {int(confidence * 100)}%."
     )
 
     return jsonify({
         "reply": reply,
-        "top_offer": best_offer.get("name", "Top Offer"),
+        "top_offer": best_offer.get("name"),
         "confidence": confidence
     })
-
 
 # =========================
 # START SERVER
