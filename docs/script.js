@@ -1,157 +1,132 @@
-// API Configuration
-const API_BASE_URL = 'https://thelewadsconenterprises.com';
-const PREDICT_ENDPOINT = `${API_BASE_URL}/api/offers/predict`;
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import os
 
-// DOM Elements
-const predictBtn = document.getElementById('predictBtn');
-const buttonText = document.getElementById('buttonText');
-const buttonLoader = document.getElementById('buttonLoader');
-const errorMessage = document.getElementById('errorMessage');
-const results = document.getElementById('results');
+app = Flask(__name__)
+CORS(app)
 
-// Result elements
-const predictedClicks = document.getElementById('predictedClicks');
-const predictedConversions = document.getElementById('predictedConversions');
-const predictedRevenue = document.getElementById('predictedRevenue');
-const confidence = document.getElementById('confidence');
-const basedOnRecords = document.getElementById('basedOnRecords');
-
-/**
- * Format number with commas
- */
-function formatNumber(num) {
-    if (typeof num !== 'number') return num;
-    return num.toLocaleString('en-US');
+# In-memory storage
+historical_data = {
+    "offers": [],
+    "email_creatives": [],
+    "campaigns": []
 }
 
-/**
- * Format currency
- */
-function formatCurrency(amount) {
-    if (typeof amount !== 'number') return amount;
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(amount);
-}
+# =========================
+# HOME
+# =========================
+@app.route("/")
+def home():
+    return jsonify({
+        "message": "Prediction Engine API is LIVE 🚀",
+        "version": "1.0.0",
+        "status": "working"
+    })
 
-/**
- * Format percentage
- */
-function formatPercentage(value) {
-    if (typeof value !== 'number') return value;
-    return `${(value * 100).toFixed(0)}%`;
-}
 
-/**
- * Show loading state
- */
-function setLoading(loading) {
-    predictBtn.disabled = loading;
-    buttonText.style.display = loading ? 'none' : 'inline';
-    buttonLoader.style.display = loading ? 'inline-block' : 'none';
-    errorMessage.style.display = 'none';
-    
-    if (!loading) {
-        results.style.display = 'none';
-    }
-}
-
-/**
- * Show error message
- */
-function showError(message) {
-    errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
-    results.style.display = 'none';
-}
-
-/**
- * Display prediction results
- */
-function displayResults(data) {
-    // Update result values
-    predictedClicks.textContent = formatNumber(data.predicted_clicks || 0);
-    predictedConversions.textContent = formatNumber(data.predicted_conversions || 0);
-    predictedRevenue.textContent = formatCurrency(data.predicted_revenue || 0);
-    confidence.textContent = formatPercentage(data.confidence || 0);
-    basedOnRecords.textContent = formatNumber(data.based_on_records || 0);
-    
-    // Show results with animation
-    results.style.display = 'block';
-    
-    // Add success animation to result cards
-    const resultCards = document.querySelectorAll('.result-card');
-    resultCards.forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('success');
-            setTimeout(() => card.classList.remove('success'), 600);
-        }, index * 100);
-    });
-}
-
-/**
- * Make prediction API call
- */
-async function predictOffers() {
-    setLoading(true);
-    
-    try {
-        const response = await fetch(PREDICT_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            // Note: The API might not require a body, but we'll send an empty object
-            // If your API requires specific data, add it here
-            body: JSON.stringify({}),
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(
-                errorData.error || errorData.message || 
-                `HTTP error! status: ${response.status}`
-            );
+# =========================
+# MODEL STATUS
+# =========================
+@app.route("/api/models/status", methods=["GET"])
+def get_model_status():
+    return jsonify({
+        "data_counts": {
+            "offers": len(historical_data["offers"]),
+            "email_creatives": len(historical_data["email_creatives"]),
+            "campaigns": len(historical_data["campaigns"])
         }
-        
-        const data = await response.json();
-        displayResults(data);
-        
-    } catch (error) {
-        console.error('Prediction error:', error);
-        
-        // User-friendly error messages
-        let errorMsg = 'Failed to get predictions. ';
-        
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMsg += 'Please check your internet connection and try again.';
-        } else if (error.message.includes('404')) {
-            errorMsg += 'The prediction endpoint was not found.';
-        } else if (error.message.includes('500')) {
-            errorMsg += 'The server encountered an error. Please try again later.';
-        } else {
-            errorMsg += error.message;
-        }
-        
-        showError(errorMsg);
-    } finally {
-        setLoading(false);
-    }
-}
+    })
 
-// Optional: Add keyboard shortcut (Enter key)
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !predictBtn.disabled) {
-        predictOffers();
-    }
-});
 
-// Check API connection on load
-window.addEventListener('load', () => {
-    console.log('Prediction Engine Frontend loaded');
-    console.log('API Endpoint:', PREDICT_ENDPOINT);
-});
+# =========================
+# OFFER DATA UPLOAD
+# =========================
+@app.route("/api/offers/upload", methods=["POST"])
+def upload_offer_data():
+    data = request.json.get("data", [])
 
+    if not isinstance(data, list):
+        return jsonify({"error": "Data must be a list"}), 400
+
+    historical_data["offers"].extend(data)
+
+    return jsonify({
+        "message": "Offer data uploaded",
+        "total": len(historical_data["offers"])
+    })
+
+
+# =========================
+# OFFER PREDICTION (WORKING)
+# =========================
+@app.route("/api/offers/predict", methods=["POST"])
+def predict_offers():
+
+    offers = historical_data["offers"]
+
+    if not offers:
+        return jsonify({
+            "error": "No historical offer data available"
+        }), 400
+
+    total_clicks = sum(o.get("clicks", 0) for o in offers)
+    total_revenue = sum(o.get("revenue", 0) for o in offers)
+    count = len(offers)
+
+    predicted_clicks = int(total_clicks / count)
+    predicted_conversions = int(predicted_clicks * 0.08)
+    predicted_revenue = int(total_revenue / count)
+
+    confidence = round(min(0.95, 0.6 + count * 0.05), 2)
+
+    return jsonify({
+        "predicted_clicks": predicted_clicks,
+        "predicted_conversions": predicted_conversions,
+        "predicted_revenue": predicted_revenue,
+        "confidence": confidence,
+        "based_on_records": count
+    })
+
+
+# =========================
+# EMAIL DATA
+# =========================
+@app.route("/api/email/upload", methods=["POST"])
+def upload_email_data():
+    data = request.json.get("data", [])
+
+    if not isinstance(data, list):
+        return jsonify({"error": "Data must be a list"}), 400
+
+    historical_data["email_creatives"].extend(data)
+
+    return jsonify({
+        "message": "Email data uploaded",
+        "total": len(historical_data["email_creatives"])
+    })
+
+
+# =========================
+# CAMPAIGN DATA
+# =========================
+@app.route("/api/campaigns/upload", methods=["POST"])
+def upload_campaign_data():
+    data = request.json.get("data", [])
+
+    if not isinstance(data, list):
+        return jsonify({"error": "Data must be a list"}), 400
+
+    historical_data["campaigns"].extend(data)
+
+    return jsonify({
+        "message": "Campaign data uploaded",
+        "total": len(historical_data["campaigns"])
+    })
+
+
+# =========================
+# START SERVER
+# =========================
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
