@@ -65,9 +65,33 @@ def upload_offer_data():
 
 @app.route("/api/offers/predict", methods=["POST"])
 def predict_offers():
-    return jsonify({
-        "error": "Prediction engine disabled (ML not connected yet)"
-    }), 503
+
+    offers = historical_data["offers"]
+
+    if len(offers) == 0:
+        return jsonify({
+            "error": "No historical offer data available"
+        }), 400
+
+    # extract metrics
+    clicks = [o.get("clicks", 0) for o in offers]
+    conversions = [o.get("conversions", 0) for o in offers]
+    revenue = [o.get("revenue", 0) for o in offers]
+
+    avg_clicks = np.mean(clicks)
+    avg_conversions = np.mean(conversions)
+    avg_revenue = np.mean(revenue)
+
+    # simple prediction logic
+    prediction = {
+        "predicted_clicks": int(avg_clicks * 1.05),
+        "predicted_conversions": int(avg_conversions * 1.07),
+        "predicted_revenue": int(avg_revenue * 1.10),
+        "confidence": round(min(0.95, 0.6 + (len(offers) * 0.05)), 2),
+        "based_on_records": len(offers)
+    }
+
+    return jsonify(prediction)
 
 
 # =========================
