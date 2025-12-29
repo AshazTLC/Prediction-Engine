@@ -2,34 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Prediction AI Dashboard</title>
+  <title>AI Prediction Engine</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="chat-container">
-    <div class="chat-header">
-      🤖 Offer Prediction AI
+  <div class="app">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h1>🚀 AI Prediction Engine</h1>
+      <div class="status">● Data Connected</div>
     </div>
 
-    <div id="chatMessages" class="chat-messages">
-      <div class="bot-message">
-        Hello 👋  
-        Ask me which offer will perform best in the next 90 days.
+    <!-- STATS -->
+    <div class="stats">
+      <div class="card">
+        <span>Total Offers</span>
+        <strong id="totalOffers">5</strong>
+      </div>
+      <div class="card">
+        <span>Total Revenue</span>
+        <strong id="totalRevenue">$4,510</strong>
+      </div>
+      <div class="card">
+        <span>Best Offer</span>
+        <strong id="bestOffer">JG Wentworth</strong>
+      </div>
+      <div class="card">
+        <span>Weak Offer</span>
+        <strong id="weakOffer">Water Damage</strong>
       </div>
     </div>
 
-    <div class="chat-input">
+    <!-- CHAT -->
+    <div class="chat" id="chatMessages">
+      <div class="msg ai">
+        👋 Hi! Ask me about your offers performance.
+        <div class="confidence">Confidence: SYSTEM READY</div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-bar">
       <input
         type="text"
         id="userInput"
-        placeholder="Type your question..."
+        placeholder="Ask about best offer, dead offers, revenue forecast..."
       />
       <button id="sendBtn">Send</button>
     </div>
+
   </div>
 
+  <!-- JS -->
   <script src="script.js"></script>
 </body>
 </html>
