@@ -2,49 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Prediction Engine</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>TLC AI Predictor</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-left">
-    <img src="logo.png" class="logo" />
-    <span class="brand">Prediction Engine</span>
-  </div>
+  <div class="container">
+    <h1 class="title">
+      Heyy Arshad & Ashaz ☀️ <br />
+      I'm your personal predictor<br />
+      Let's predict together
+    </h1>
 
-  <div class="nav-right">
-    <button class="nav-btn active">Home</button>
-    <button class="nav-btn">Predict</button>
-    <button class="nav-btn">Reports</button>
-  </div>
-</nav>
+    <div id="chatBox" class="chat-box"></div>
 
-<!-- APP -->
-<div class="app">
-
-  <div class="chat" id="chatMessages">
-    <div class="msg ai">
-      👋 Hi! Ask me anything about your offers.
-      <div class="confidence">SYSTEM READY</div>
+    <div class="input-bar">
+      <input
+        id="userInput"
+        type="text"
+        placeholder="Ask anything"
+        autocomplete="off"
+      />
+      <button onclick="sendMessage()">➤</button>
     </div>
   </div>
-
-  <!-- INPUT -->
-  <div class="input-bar">
-    <input
-      type="text"
-      id="userInput"
-      placeholder="Which offer will perform best?"
-    />
-    <button id="sendBtn">Send</button>
-  </div>
-
-</div>
 
 <script src="script.js"></script>
 </body>
