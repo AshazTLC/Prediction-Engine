@@ -1,50 +1,23 @@
-"""
-Flask web API for Prediction Engine
-Deploy to Railway.app
-"""
-
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-# =========================
-# In-memory storage
-# =========================
 historical_data = {
-    "offers": [],
-    "email_creatives": [],
-    "campaigns": []
+    "offers": []
 }
 
 # =========================
-# HOME
+# DASHBOARD UI
 # =========================
 @app.route("/")
-def home():
-    return jsonify({
-        "message": "Prediction Engine API is LIVE 🚀",
-        "version": "1.0.0",
-        "status": "working"
-    })
+def dashboard():
+    return render_template("dashboard.html")
 
 # =========================
-# MODEL STATUS
-# =========================
-@app.route("/api/models/status", methods=["GET"])
-def get_model_status():
-    return jsonify({
-        "data_counts": {
-            "offers": len(historical_data["offers"]),
-            "email_creatives": len(historical_data["email_creatives"]),
-            "campaigns": len(historical_data["campaigns"])
-        }
-    })
-
-# =========================
-# OFFER DATA UPLOAD
+# UPLOAD OFFER DATA
 # =========================
 @app.route("/api/offers/upload", methods=["POST"])
 def upload_offer_data():
@@ -57,70 +30,65 @@ def upload_offer_data():
     historical_data["offers"].extend(offers)
 
     return jsonify({
-        "message": "Offer data uploaded",
-        "total": len(historical_data["offers"])
+        "message": "Offer data uploaded successfully",
+        "total_records": len(historical_data["offers"])
     })
 
 # =========================
-# OFFER PREDICTION
-# =========================
-@app.route("/api/offers/predict", methods=["POST"])
-def predict_offers():
-    offers = historical_data["offers"]
-
-    if not offers:
-        return jsonify({"error": "No historical offer data available"}), 400
-
-    total_clicks = sum(o.get("clicks", 0) for o in offers)
-    total_revenue = sum(o.get("revenue", 0) for o in offers)
-    count = len(offers)
-
-    predicted_clicks = int(total_clicks / count)
-    predicted_conversions = int(predicted_clicks * 0.08)
-    predicted_revenue = int(total_revenue / count)
-    confidence = round(min(0.95, 0.6 + count * 0.05), 2)
-
-    return jsonify({
-        "predicted_clicks": predicted_clicks,
-        "predicted_conversions": predicted_conversions,
-        "predicted_revenue": predicted_revenue,
-        "confidence": confidence,
-        "based_on_records": count
-    })
-
-# =========================
-# AI CHAT PREDICTION (FINAL)
+# CHAT AI PREDICTION
 # =========================
 @app.route("/api/chat/predict", methods=["POST"])
 def chat_predict():
     data = request.get_json(silent=True) or {}
-    prompt = data.get("prompt", "")
-
+    prompt = data.get("prompt", "").lower()
     offers = historical_data["offers"]
 
     if not offers:
         return jsonify({
-            "reply": "I don’t have enough data yet. Please upload offer data first.",
-            "confidence": 0
+            "reply": "No historical data found. Upload offer data first.",
+            "confidence": "LOW"
         })
 
-    best_offer = max(offers, key=lambda x: x.get("revenue", 0))
+    sorted_offers = sorted(offers, key=lambda x: x.get("revenue", 0))
+    best = sorted_offers[-1]
+    worst = sorted_offers[0]
+    mid = sorted_offers[len(sorted_offers)//2]
     total = len(offers)
-    confidence = round(min(0.95, 0.6 + total * 0.05), 2)
+
+    if total >= 6:
+        confidence = "HIGH"
+    elif total >= 3:
+        confidence = "MEDIUM"
+    else:
+        confidence = "LOW"
+
+    if "dead" in prompt or "stop" in prompt:
+        reply = (
+            f"🚨 DEAD OFFER ALERT\n\n"
+            f"Offer: {worst['name']}\n"
+            f"Revenue: ${worst['revenue']:,}\n"
+            f"Confidence: {confidence}"
+        )
+        return jsonify({"reply": reply})
+
+    if "best" in prompt or "perform" in prompt:
+        reply = (
+            f"🚀 TOP PERFORMER\n\n"
+            f"Offer: {best['name']}\n"
+            f"Expected Revenue (90 days): ${best['revenue']:,}\n"
+            f"Confidence: {confidence}"
+        )
+        return jsonify({"reply": reply})
 
     reply = (
-        f"Based on {total} historical offers, "
-        f"'{best_offer.get('name', 'Top Offer')}' is expected to perform best "
-        f"in the next 90 days with an estimated revenue of "
-        f"₹{best_offer.get('revenue', 0):,}. "
-        f"Confidence level is {int(confidence * 100)}%."
+        f"📊 PERFORMANCE SUMMARY\n\n"
+        f"Best: {best['name']} (${best['revenue']:,})\n"
+        f"Average: {mid['name']} (${mid['revenue']:,})\n"
+        f"Weak: {worst['name']} (${worst['revenue']:,})\n\n"
+        f"Confidence: {confidence}"
     )
 
-    return jsonify({
-        "reply": reply,
-        "top_offer": best_offer.get("name"),
-        "confidence": confidence
-    })
+    return jsonify({"reply": reply})
 
 # =========================
 # START SERVER
