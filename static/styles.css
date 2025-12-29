@@ -1,45 +1,124 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
 body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
+  margin: 0;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.container {
-  width: 600px;
-  margin: auto;
-  margin-top: 40px;
-}
-
-.chat-box {
+.app {
+  width: 900px;
+  height: 90vh;
   background: #020617;
-  height: 400px;
-  padding: 15px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,.7);
+}
+
+/* Header */
+.header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.status {
+  color: #22c55e;
+  font-size: 14px;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.card {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.card span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.card strong {
+  font-size: 18px;
+  display: block;
+  margin-top: 4px;
+}
+
+/* Chat */
+.chat {
+  flex: 1;
+  padding: 16px;
   overflow-y: auto;
-  border-radius: 10px;
+}
+
+.msg {
+  margin-bottom: 12px;
+  max-width: 75%;
+  padding: 12px;
+  border-radius: 12px;
 }
 
 .user {
-  text-align: right;
-  color: #38bdf8;
-  margin: 8px;
+  background: #2563eb;
+  margin-left: auto;
 }
 
-.bot {
-  text-align: left;
-  color: #a7f3d0;
-  margin: 8px;
+.ai {
+  background: #020617;
+  border: 1px solid #1e293b;
 }
 
-.input-box {
+.confidence {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+/* Input */
+.input-bar {
   display: flex;
-  margin-top: 10px;
+  padding: 16px;
+  border-top: 1px solid #1e293b;
 }
 
-input {
+.input-bar input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #fff;
 }
 
-button {
-  padding: 10px;
+.input-bar button {
+  margin-left: 10px;
+  padding: 12px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
 }
