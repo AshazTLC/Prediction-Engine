@@ -1,15 +1,14 @@
-const API_URL = "https://thelewadsconenterprises.com/api/chat/predict";
+const API_URL = "https://theleadsconenterprises.com/api/chat/predict";
 
-const chatMessages = document.getElementById("chatMessages");
+const chatBox = document.getElementById("chatBox");
 const userInput = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
 
 function addMessage(text, type) {
   const div = document.createElement("div");
-  div.className = type === "user" ? "user-message" : "bot-message";
-  div.textContent = text;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  div.className = type === "user" ? "user-msg" : "bot-msg";
+  div.innerText = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function sendMessage() {
@@ -19,37 +18,27 @@ async function sendMessage() {
   addMessage(text, "user");
   userInput.value = "";
 
-  const thinking = document.createElement("div");
-  thinking.className = "bot-message";
-  thinking.textContent = "Analyzing historical data...";
-  chatMessages.appendChild(thinking);
+  const typing = document.createElement("div");
+  typing.className = "bot-msg typing";
+  typing.innerText = "AI is thinking...";
+  chatBox.appendChild(typing);
 
   try {
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: text })
     });
 
-    const data = await response.json();
+    const data = await res.json();
+    typing.remove();
+    addMessage(data.reply || "No response.", "bot");
 
-    if (data.reply) {
-      thinking.textContent = data.reply;
-    } else {
-      thinking.textContent = "No prediction available.";
-    }
-
-  } catch (error) {
-    thinking.textContent = "Server error. Please try again.";
+  } catch (err) {
+    typing.innerText = "Server error. Try again.";
   }
 }
 
-sendBtn.addEventListener("click", sendMessage);
-
-userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
+userInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
 });
