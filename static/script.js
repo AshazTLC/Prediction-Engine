@@ -6,10 +6,28 @@ const sendBtn = document.getElementById("sendBtn");
 
 function addMessage(text, type) {
   const div = document.createElement("div");
-  div.className = type === "user" ? "user-message" : "bot-message";
-  div.textContent = text;
+  div.className = `msg ${type}`;
   chatMessages.appendChild(div);
+
+  if (type === "ai") {
+    typeEffect(div, text);
+  } else {
+    div.textContent = text;
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function typeEffect(element, text) {
+  let i = 0;
+  element.textContent = "";
+
+  const interval = setInterval(() => {
+    element.textContent += text.charAt(i);
+    i++;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (i >= text.length) clearInterval(interval);
+  }, 18);
 }
 
 async function sendMessage() {
@@ -20,36 +38,27 @@ async function sendMessage() {
   userInput.value = "";
 
   const thinking = document.createElement("div");
-  thinking.className = "bot-message";
-  thinking.textContent = "Analyzing historical data...";
+  thinking.className = "msg ai";
+  thinking.textContent = "Thinking...";
   chatMessages.appendChild(thinking);
 
   try {
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: text })
     });
 
-    const data = await response.json();
+    const data = await res.json();
+    chatMessages.removeChild(thinking);
+    addMessage(data.reply || "No response.", "ai");
 
-    if (data.reply) {
-      thinking.textContent = data.reply;
-    } else {
-      thinking.textContent = "No prediction available.";
-    }
-
-  } catch (error) {
-    thinking.textContent = "Server error. Please try again.";
+  } catch (err) {
+    thinking.textContent = "Server error. Try again.";
   }
 }
 
-sendBtn.addEventListener("click", sendMessage);
-
-userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
+sendBtn.onclick = sendMessage;
+userInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
 });
