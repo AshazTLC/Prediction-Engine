@@ -1,1 +1,71 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #121212;
+  color: #fff;
+  display: flex;
+}
+
+.sidebar {
+  width: 220px;
+  background: #1e1e1e;
+  padding: 20px;
+}
+
+.sidebar a {
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  margin: 15px 0;
+}
+
+.logo {
+  width: 120px;
+  margin-bottom: 20px;
+}
+
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.chat-box {
+  height: 60vh;
+  overflow-y: auto;
+  margin: 20px 0;
+}
+
+.user-msg {
+  text-align: right;
+  margin: 10px;
+  color: #4caf50;
+}
+
+.bot-msg {
+  text-align: left;
+  margin: 10px;
+  color: #00e5ff;
+}
+
+.typing {
+  opacity: 0.6;
+}
+
+.input-box {
+  display: flex;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  border-radius: 50%;
+  border: none;
+}
 
