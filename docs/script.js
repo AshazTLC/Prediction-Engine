@@ -1,4 +1,4 @@
-const API_URL = "https://theleadsconenterprises.com/api/chat/predict";
+const API_URL = "https://thelewadsconenterprises.com/api/chat/predict";
 
 const chatMessages = document.getElementById("chatMessages");
 const userInput = document.getElementById("userInput");
@@ -21,9 +21,8 @@ async function sendMessage() {
 
   const thinking = document.createElement("div");
   thinking.className = "bot-message";
-  thinking.textContent = "Thinking...";
+  thinking.textContent = "Analyzing historical data...";
   chatMessages.appendChild(thinking);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 
   try {
     const response = await fetch(API_URL, {
@@ -35,10 +34,14 @@ async function sendMessage() {
     });
 
     const data = await response.json();
-    thinking.textContent = data.reply || "No response received.";
+
+    if (data.reply) {
+      thinking.textContent = data.reply;
+    } else {
+      thinking.textContent = "No prediction available.";
+    }
 
   } catch (error) {
-    console.error(error);
     thinking.textContent = "Server error. Please try again.";
   }
 }
