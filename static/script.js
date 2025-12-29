@@ -1,10 +1,12 @@
+const API_URL = "https://thelewadsconenterprises.com/api/chat/predict";
+
 const chatMessages = document.getElementById("chatMessages");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 
 function addMessage(text, type) {
   const div = document.createElement("div");
-  div.className = type;
+  div.className = type === "user" ? "user-message" : "bot-message";
   div.textContent = text;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -17,16 +19,37 @@ async function sendMessage() {
   addMessage(text, "user");
   userInput.value = "";
 
-  addMessage("Thinking...", "bot");
+  const thinking = document.createElement("div");
+  thinking.className = "bot-message";
+  thinking.textContent = "Analyzing historical data...";
+  chatMessages.appendChild(thinking);
 
-  const response = await fetch("/api/chat/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: text })
-  });
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt: text })
+    });
 
-  const data = await response.json();
-  chatMessages.lastChild.textContent = data.reply;
+    const data = await response.json();
+
+    if (data.reply) {
+      thinking.textContent = data.reply;
+    } else {
+      thinking.textContent = "No prediction available.";
+    }
+
+  } catch (error) {
+    thinking.textContent = "Server error. Please try again.";
+  }
 }
 
-sendBtn.onclick = sendMessage;
+sendBtn.addEventListener("click", sendMessage);
+
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
