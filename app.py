@@ -125,4 +125,7 @@ def chat_predict():
         "reply": reply,
         "confidence": confidence
     })
+    
+# DO NOTHING HERE
+# gunicorn will start the app
 
