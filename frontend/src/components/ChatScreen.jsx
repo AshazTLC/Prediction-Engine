@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import Message from '@/components/Message';
 import TypingIndicator from '@/components/TypingIndicator';
 
-const API_URL = "/api/predict"; // IMPORTANT (same domain backend)
+/**
+ * IMPORTANT:
+ * This must point to your Railway backend
+ * which is already mapped to your custom domain
+ */
+const API_URL = "https://ai.theleadsconnterprises.com/api/chat/predict";
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -46,6 +51,10 @@ const ChatScreen = () => {
           message: userMessage.content
         }),
       });
+
+      if (!response.ok) {
+        throw new Error("API Error");
+      }
 
       const data = await response.json();
 
@@ -123,7 +132,7 @@ const ChatScreen = () => {
       {/* Input */}
       <div className="bg-[#1A1D24] border-t border-gray-800 px-6 py-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 bg-[#252931] rounded-2xl px-4 py-3 border border-gray-700">
+          <div className="flex items-center gap-3 bg-[#252931] rounded-2xl px-4 py-3 border border-gray-700 focus-within:border-[#F57C00] transition">
             <input
               ref={inputRef}
               type="text"
@@ -131,12 +140,12 @@ const ChatScreen = () => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask anything..."
-              className="flex-1 bg-transparent outline-none text-white"
+              className="flex-1 bg-transparent outline-none text-white placeholder:text-gray-500"
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim()}
-              className="bg-gradient-to-r from-[#F57C00] to-[#2BB0E6]"
+              className="bg-gradient-to-r from-[#F57C00] to-[#2BB0E6] hover:opacity-90"
             >
               <Send className="w-5 h-5" />
             </Button>
