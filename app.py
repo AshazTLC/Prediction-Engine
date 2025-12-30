@@ -2,7 +2,11 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="templates",   # make sure templates folder exists
+    static_folder="static"         # optional, for CSS/JS
+)
 CORS(app)
 
 # =========================
@@ -41,8 +45,8 @@ def upload_offer_data():
     historical_data["offers"].extend(offers)
 
     return jsonify({
-        "message": "Offer data uploaded",
-        "total": len(historical_data["offers"])
+        "message": "Offer data uploaded successfully",
+        "total_records": len(historical_data["offers"])
     })
 
 # =========================
@@ -65,7 +69,7 @@ def chat_predict():
     sorted_offers = sorted(offers, key=lambda x: x.get("revenue", 0))
     best_offer = sorted_offers[-1]
     worst_offer = sorted_offers[0]
-    mid_offer = sorted_offers[len(sorted_offers)//2]
+    mid_offer = sorted_offers[len(sorted_offers) // 2]
 
     total = len(offers)
 
@@ -79,34 +83,48 @@ def chat_predict():
 
     confidence = confidence_level(total)
 
-    # Dead offer logic
-    if "dead" in prompt or "low" in prompt:
+    # DEAD OFFER LOGIC
+    if "dead" in prompt or "low" in prompt or "stop" in prompt:
         reply = (
-            f"⚠️ '{worst_offer.get('name')}' is likely to go dead in the next 30 days.\n\n"
+            f"⚠️ OFFER AT RISK\n\n"
+            f"'{worst_offer.get('name', 'Unknown')}' may go dead in the next 30 days.\n\n"
             f"Revenue: ${worst_offer.get('revenue', 0):,}\n"
-            f"Confidence: {confidence}"
+            f"Confidence Level: {confidence}"
         )
-        return jsonify({"reply": reply, "confidence": confidence})
+        return jsonify({
+            "reply": reply,
+            "confidence": confidence,
+            "offer": worst_offer.get("name")
+        })
 
-    # Best offer logic
-    if "best" in prompt or "90" in prompt:
+    # BEST OFFER LOGIC
+    if "best" in prompt or "perform" in prompt or "90" in prompt:
         reply = (
-            f"🚀 '{best_offer.get('name')}' is expected to perform best in the next 90 days.\n\n"
+            f"🚀 TOP PERFORMING OFFER\n\n"
+            f"'{best_offer.get('name', 'Top Offer')}' is expected to perform best "
+            f"in the next 90 days.\n\n"
             f"Estimated Revenue: ${best_offer.get('revenue', 0):,}\n"
-            f"Confidence: {confidence}"
+            f"Confidence Level: {confidence}"
         )
-        return jsonify({"reply": reply, "confidence": confidence})
+        return jsonify({
+            "reply": reply,
+            "confidence": confidence,
+            "offer": best_offer.get("name")
+        })
 
-    # Default response
+    # DEFAULT RESPONSE
     reply = (
-        f"📊 Performance Overview:\n\n"
-        f"Best: {best_offer.get('name')} (${best_offer.get('revenue', 0):,})\n"
-        f"Average: {mid_offer.get('name')} (${mid_offer.get('revenue', 0):,})\n"
-        f"Weak: {worst_offer.get('name')} (${worst_offer.get('revenue', 0):,})\n\n"
-        f"Confidence: {confidence}"
+        f"📊 PERFORMANCE SNAPSHOT\n\n"
+        f"🔝 Best: {best_offer.get('name')} (${best_offer.get('revenue', 0):,})\n"
+        f"➖ Average: {mid_offer.get('name')} (${mid_offer.get('revenue', 0):,})\n"
+        f"⚠️ Weak: {worst_offer.get('name')} (${worst_offer.get('revenue', 0):,})\n\n"
+        f"Confidence Level: {confidence}"
     )
 
-    return jsonify({"reply": reply, "confidence": confidence})
+    return jsonify({
+        "reply": reply,
+        "confidence": confidence
+    })
 
 # =========================
 # START SERVER (RAILWAY)
