@@ -8,24 +8,25 @@ historical_data = {
     "offers": []
 }
 
-@app.route("/", methods=["GET"])
+@app.route("/health")
 def health():
-    return {"status": "TLC Prediction Engine is LIVE"}
+    return {"status": "ok"}
 
 @app.route("/api/chat/predict", methods=["POST"])
 def chat_predict():
     data = request.get_json() or {}
-    prompt = data.get("prompt", "").lower()
+    message = data.get("message", "").lower()
 
     if not historical_data["offers"]:
         return jsonify({
-            "reply": "No historical data found yet.",
+            "reply": "No historical data yet. Please upload offer data.",
             "confidence": "LOW"
         })
 
     offers = sorted(historical_data["offers"], key=lambda x: x.get("revenue", 0))
     best = offers[-1]
-    worst = offers[0]
 
-    reply = f"Best offer: {best.get('name')} (${best.get('revenue')})"
-    return jsonify({"reply": reply, "confidence": "MEDIUM"})
+    return jsonify({
+        "reply": f"Best performing offer is {best.get('name')} with revenue ${best.get('revenue')}",
+        "confidence": "MEDIUM"
+    })
