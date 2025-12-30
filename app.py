@@ -4,26 +4,28 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# ======================
-# HEALTH CHECK (CRITICAL)
-# ======================
-@app.route("/")
-def home():
-    return "TLC Prediction Engine is LIVE", 200
+historical_data = {
+    "offers": []
+}
 
-@app.route("/health")
+@app.route("/", methods=["GET"])
 def health():
-    return "OK", 200
+    return {"status": "TLC Prediction Engine is LIVE"}
 
-# ======================
-# CHAT API
-# ======================
 @app.route("/api/chat/predict", methods=["POST"])
 def chat_predict():
-    data = request.get_json(silent=True) or {}
-    prompt = data.get("prompt", "")
+    data = request.get_json() or {}
+    prompt = data.get("prompt", "").lower()
 
-    return jsonify({
-        "reply": f"You asked: {prompt}",
-        "confidence": "MEDIUM"
-    })
+    if not historical_data["offers"]:
+        return jsonify({
+            "reply": "No historical data found yet.",
+            "confidence": "LOW"
+        })
+
+    offers = sorted(historical_data["offers"], key=lambda x: x.get("revenue", 0))
+    best = offers[-1]
+    worst = offers[0]
+
+    reply = f"Best offer: {best.get('name')} (${best.get('revenue')})"
+    return jsonify({"reply": reply, "confidence": "MEDIUM"})
