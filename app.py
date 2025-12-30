@@ -1,14 +1,32 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-import os
 
-app = Flask(__name__)
+# IMPORTANT: explicitly define folders
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
+
 CORS(app)
 
+# =========================
+# In-memory data
+# =========================
 historical_data = {
     "offers": []
 }
 
+# =========================
+# HEALTH CHECK (REQUIRED)
+# =========================
+@app.route("/health")
+def health():
+    return "OK", 200
+
+# =========================
+# UI ROUTES
+# =========================
 @app.route("/")
 def chat():
     return render_template("chat.html")
@@ -21,10 +39,13 @@ def dashboard():
 def reports():
     return "Reports coming soon"
 
+# =========================
+# CHAT AI API
+# =========================
 @app.route("/api/chat/predict", methods=["POST"])
 def chat_predict():
     data = request.get_json(silent=True) or {}
-    prompt = data.get("prompt", "").lower()
+    prompt = data.get("prompt", "")
 
     if not historical_data["offers"]:
         return jsonify({
@@ -34,9 +55,14 @@ def chat_predict():
 
     offers = sorted(historical_data["offers"], key=lambda x: x.get("revenue", 0))
     best = offers[-1]
-    worst = offers[0]
 
-    reply = f"Best offer: {best.get('name')} (${best.get('revenue')})"
-    return jsonify({"reply": reply, "confidence": "MEDIUM"})
+    reply = (
+        f"🚀 Best performing offer:\n\n"
+        f"{best.get('name')} → ${best.get('revenue', 0)}\n\n"
+        f"Confidence: MEDIUM"
+    )
 
-# ❌ DO NOT use app.run() in Railway
+    return jsonify({
+        "reply": reply,
+        "confidence": "MEDIUM"
+    })
