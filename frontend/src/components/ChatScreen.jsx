@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Message from '@/components/Message';
 import TypingIndicator from '@/components/TypingIndicator';
 
-const API_URL = "https://luxutsl3.up.railway.app/api/chat/predict";
+const API_URL = "https://web-production-da9bb.up.railway.app";
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
